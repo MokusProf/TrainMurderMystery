@@ -11,6 +11,7 @@ import dev.doctor4t.trainmurdermystery.client.model.TrainMurderMysteryEntityMode
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.SmallDoorBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
 import dev.doctor4t.trainmurdermystery.index.*;
+import dev.doctor4t.trainmurdermystery.util.HandParticleManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -18,6 +19,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -39,6 +41,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 public class TrainMurderMysteryClient implements ClientModInitializer {
+    public static HandParticleManager handParticleManager;
     private static float trainSpeed;
     private static boolean prevGameRunning;
     private static WorldGameComponent GAME_COMPONENT;
@@ -54,6 +57,9 @@ public class TrainMurderMysteryClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        //Initialize ScreenParticle
+        handParticleManager = new HandParticleManager();
+
         // Register particle factories
         TrainMurderMysteryParticles.registerFactories();
 
@@ -154,6 +160,10 @@ public class TrainMurderMysteryClient implements ClientModInitializer {
                 MinecraftClient.getInstance().player.getInventory().selectedSlot = 8;
             }
             prevGameRunning = GAME_COMPONENT.isRunning();
+        });
+
+        ClientTickEvents.END_CLIENT_TICK.register((client) -> {
+            TrainMurderMysteryClient.handParticleManager.tick();
         });
 
         // Instinct keybind

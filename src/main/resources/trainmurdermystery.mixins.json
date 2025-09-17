@@ -16,6 +16,7 @@
     "client.MinecraftClientMixin",
     "client.items.BipedEntityModelMixin",
     "client.items.ClientPlayerEntityMixin",
+    "client.items.HeldItemRendererMixin",
     "client.restrictions.ChatHudMixin",
     "client.restrictions.CreativeInventoryScreenMixin",
     "client.restrictions.KeyBindingMixin",

@@ -3,25 +3,31 @@ package dev.doctor4t.trainmurdermystery.item;
 import dev.doctor4t.trainmurdermystery.TrainMurderMystery;
 import dev.doctor4t.trainmurdermystery.block.SmallDoorBlock;
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
+import dev.doctor4t.trainmurdermystery.client.TrainMurderMysteryClient;
+import dev.doctor4t.trainmurdermystery.client.particle.HandParticle;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import dev.doctor4t.trainmurdermystery.game.GameLoop;
 import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TrainMurderMysteryEntities;
 import dev.doctor4t.trainmurdermystery.index.TrainMurderMysterySounds;
+import dev.doctor4t.trainmurdermystery.util.HandParticleManager;
+import dev.doctor4t.trainmurdermystery.util.MatrixUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,8 +67,14 @@ public class RevolverItem extends Item {
         } else {
             if (bullets > 0) {
                 user.setPitch(user.getPitch() - 4);
-//            Vec3d mul = new Vec3d(user.getX(), user.getEyeY(), user.getZ()).add(user.getRotationVector().multiply(0.5f));
-//            world.addParticle(ParticleTypes.WHITE_SMOKE, mul.getX(), mul.getY(), mul.getZ(), 0, 0, 0);
+
+                HandParticle particle_animated = new HandParticle(0.1f, 0.275f, -0.2f,
+                        0, 0, 0,
+                        0.5f, 8,
+                        TrainMurderMystery.id("textures/particle/gunshot.png"),
+                        17, false);
+                TrainMurderMysteryClient.handParticleManager.spawn(particle_animated);
+
                 return TypedActionResult.consume(user.getStackInHand(hand));
             } else {
                 return TypedActionResult.fail(user.getStackInHand(hand));
