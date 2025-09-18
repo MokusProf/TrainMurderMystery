@@ -70,27 +70,29 @@ public class InGameHudMixin {
 
     @WrapMethod(method = "renderSleepOverlay")
     private void tmm$overrideSleepOverlay(DrawContext context, RenderTickCounter tickCounter, Operation<Void> original) {
-        // game start fade in
-        float fadeIn = TMMGameLoop.gameComponent.getFadeIn();
-        float tickDelta = 0; //MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
-        if (fadeIn >= 0) {
-            this.client.getProfiler().push("tmmFadeIn");
-            float fadeAlpha = MathHelper.lerp(Math.min(fadeIn / TMMGameConstants.FADE_TIME + tickDelta, 1), 0f, 1f);
-            Color color = new Color(0f, 0f, 0f, fadeAlpha);
+        if (TMMGameLoop.gameComponent != null) {
+            // game start fade in
+            float fadeIn = TMMGameLoop.gameComponent.getFadeIn();
+            float tickDelta = 0; //MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+            if (fadeIn >= 0) {
+                this.client.getProfiler().push("tmmFadeIn");
+                float fadeAlpha = MathHelper.lerp(Math.min(fadeIn / TMMGameConstants.FADE_TIME + tickDelta, 1), 0f, 1f);
+                Color color = new Color(0f, 0f, 0f, fadeAlpha);
 
-            context.fill(RenderLayer.getGuiOverlay(), 0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(), color.getRGB());
-            this.client.getProfiler().pop();
-        }
+                context.fill(RenderLayer.getGuiOverlay(), 0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(), color.getRGB());
+                this.client.getProfiler().pop();
+            }
 
-        // game stop fade out
-        float fadeOut = TMMGameLoop.gameComponent.getFadeOut();
-        if (fadeOut >= 0) {
-            this.client.getProfiler().push("tmmFadeOut");
-            float fadeAlpha = MathHelper.lerp(Math.min(fadeOut / TMMGameConstants.FADE_TIME + tickDelta, 1), 0f, 1f);
-            Color color = new Color(0f, 0f, 0f, fadeAlpha);
+            // game stop fade out
+            float fadeOut = TMMGameLoop.gameComponent.getFadeOut();
+            if (fadeOut >= 0) {
+                this.client.getProfiler().push("tmmFadeOut");
+                float fadeAlpha = MathHelper.lerp(Math.min(fadeOut / TMMGameConstants.FADE_TIME + tickDelta, 1), 0f, 1f);
+                Color color = new Color(0f, 0f, 0f, fadeAlpha);
 
-            context.fill(RenderLayer.getGuiOverlay(), 0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(), color.getRGB());
-            this.client.getProfiler().pop();
+                context.fill(RenderLayer.getGuiOverlay(), 0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(), color.getRGB());
+                this.client.getProfiler().pop();
+            }
         }
 
         // darker sleep overlay
