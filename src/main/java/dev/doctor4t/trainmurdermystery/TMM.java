@@ -1,7 +1,7 @@
 package dev.doctor4t.trainmurdermystery;
 
 import dev.doctor4t.trainmurdermystery.command.*;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.util.KnifeStabPayload;
 import dev.doctor4t.trainmurdermystery.util.ShootMuzzleS2CPayload;
@@ -42,33 +42,29 @@ public class TMM implements ModInitializer {
             ResetTrainCommand.register(dispatcher);
         }));
 
-        // Game loop tick
-        ServerTickEvents.START_WORLD_TICK.register(TMMGameLoop::tick);
-
         PayloadTypeRegistry.playS2C().register(ShootMuzzleS2CPayload.ID, ShootMuzzleS2CPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(KnifeStabPayload.ID, KnifeStabPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(KnifeStabPayload.ID, new KnifeStabPayload.Receiver());
     }
 }
 
-// TODO: Add tasks (2-3 hours)
-// TODO: System that remembers previous roles and allows cycling of roles (3h)
-// TODO: Train chimney smoke + ringable horn?
-// TODO: - Sync scenery
-// TODO: - Up sleep chances
-// TODO: - Fix vents
-// TODO: - Sleep chat fix
-// TODO: - Fix spectators being shot by guns
-// TODO: - Fix doors not being blastable
-// TODO: - Better tasks
-// TODO: - Target system only for bonus
-// TODO: - Cabin button from inside
-// TODO: - Detective drops gun on innocent kill
-// TODO: - Players collide with each other
-// TODO: - Hitmen know each other
-// TODO: - Make the detective drop the gun on killed
-// TODO: - Louder footsteps
-// TODO: - Username when hovering over them
+// TODO: System that remembers previous roles and allows cycling of roles
+// TODO: Train chimney smoke + ringable horn, triggers game start in lobby
+// TODO: Sync scenery
+// TODO: Up sleep chances
+// TODO: Fix vents
+// TODO: Sleep chat fix
+// TODO: Fix spectators being shot by guns
+// TODO: Better tasks
+// TODO: - Get a snack from restaurant task
+// TODO: - Get a drink from the bar task
+// TODO: Target system only for bonus
+// TODO: Cabin button from inside
+// TODO: Detective drops gun on innocent kill
+// TODO: Make the detective drop the gun on killed
+// TODO: Players collide with each other
+// TODO: Louder footsteps
+// TODO: Barrier panels for lobby
 // TODO: Hitman item shop
 // TODO: - Explosive for clumped up people
 // TODO: - Poison

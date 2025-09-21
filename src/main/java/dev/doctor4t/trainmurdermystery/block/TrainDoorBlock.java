@@ -2,7 +2,6 @@ package dev.doctor4t.trainmurdermystery.block;
 
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import net.minecraft.block.BlockState;

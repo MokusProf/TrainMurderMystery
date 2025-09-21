@@ -85,9 +85,9 @@ public class InGameHudMixin {
 
     @WrapMethod(method = "renderSleepOverlay")
     private void tmm$overrideSleepOverlay(DrawContext context, RenderTickCounter tickCounter, Operation<Void> original) {
-        if (TMMClient.GAME_COMPONENT != null) {
+        if (TMMClient.gameComponent != null) {
             // game start / stop fade in / out
-            float fadeIn = TMMClient.GAME_COMPONENT.getFade();
+            float fadeIn = TMMClient.gameComponent.getFade();
             if (fadeIn >= 0) {
                 this.client.getProfiler().push("tmmFade");
                 float fadeAlpha = MathHelper.lerp(Math.min(fadeIn / TMMGameConstants.FADE_TIME, 1), 0f, 1f);

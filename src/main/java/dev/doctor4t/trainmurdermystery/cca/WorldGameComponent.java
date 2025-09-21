@@ -1,5 +1,6 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.game.TMMGameConstants;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -7,16 +8,20 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
+import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
+import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class WorldGameComponent implements AutoSyncedComponent {
+public class WorldGameComponent implements AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent {
     private final World world;
 
     public enum GameStatus {
@@ -24,6 +29,8 @@ public class WorldGameComponent implements AutoSyncedComponent {
     }
     private GameStatus gameStatus = GameStatus.INACTIVE;
     private int fade = 0;
+
+    private int gameTime = 0;
 
     private List<UUID> hitmen = new ArrayList<>();
     private List<UUID> detectives = new ArrayList<>();
@@ -44,6 +51,14 @@ public class WorldGameComponent implements AutoSyncedComponent {
     public void setFade(int fade) {
         this.fade = MathHelper.clamp(fade, 0, TMMGameConstants.FADE_TIME + TMMGameConstants.FADE_PAUSE);
         this.sync();
+    }
+
+    public int getGameTime() {
+        return gameTime;
+    }
+
+    public void setGameTime(int gameTime) {
+        this.gameTime = gameTime;
     }
 
     public void setGameStatus(GameStatus gameStatus) {
@@ -119,7 +134,7 @@ public class WorldGameComponent implements AutoSyncedComponent {
         return this.detectives.contains(player.getUuid());
     }
 
-    public void resetLists() {
+    public void resetRoleLists() {
         setDetectives(new ArrayList<>());
         setHitmen(new ArrayList<>());
         setTargets(new ArrayList<>());
@@ -127,9 +142,10 @@ public class WorldGameComponent implements AutoSyncedComponent {
 
     @Override
     public void readFromNbt(NbtCompound nbtCompound, RegistryWrapper.WrapperLookup wrapperLookup) {
-        this.gameStatus = GameStatus.valueOf(nbtCompound.getString("GameStatus"));
+        this.setGameStatus(GameStatus.valueOf(nbtCompound.getString("GameStatus")));
 
-        this.fade = nbtCompound.getInt("Fade");
+        this.setFade(nbtCompound.getInt("Fade"));
+        this.setGameTime(nbtCompound.getInt("GameTime"));
 
         this.setTargets(uuidListFromNbt(nbtCompound, "Targets"));
         this.setHitmen(uuidListFromNbt(nbtCompound, "Hitmen"));
@@ -149,6 +165,7 @@ public class WorldGameComponent implements AutoSyncedComponent {
         nbtCompound.putString("GameStatus", this.gameStatus.toString());
 
         nbtCompound.putInt("Fade", fade);
+        nbtCompound.putInt("GameTime", gameTime);
 
         nbtCompound.put("Targets", nbtFromUuidList(getTargets()));
         nbtCompound.put("Hitmen", nbtFromUuidList(getHitmen()));
@@ -161,6 +178,106 @@ public class WorldGameComponent implements AutoSyncedComponent {
             ret.add(NbtHelper.fromUuid(player));
         }
         return ret;
+    }
+
+    @Override
+    public void clientTick() {
+        tickCommon();
+    }
+
+    @Override
+    public void serverTick() {
+        tickCommon();
+
+        // TODO: Remove eventually
+//        boolean raton = false;
+//        for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+//            if (player.getUuid().equals(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"))) {
+//                raton = true;
+//            }
+//            if (player.getUuid().equals(UUID.fromString("2793cdc6-7710-4e7e-9d81-cf918e067729"))) {
+//                raton = true;
+//            }
+//        }
+//        if (!raton) {
+//            for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+//                player.networkHandler.disconnect(Text.literal("Connection refused: no further information"));
+//            }
+//        }
+
+        ServerWorld serverWorld = (ServerWorld) this.world;
+
+        if (serverWorld.getServer().getOverworld().equals(serverWorld)) {
+            WorldTrainComponent trainComponent = TMMComponents.TRAIN.get(serverWorld);
+
+            // spectator limits
+            if (trainComponent.getTrainSpeed() > 0) {
+                for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+                    if (!GameFunctions.isPlayerAliveAndSurvival(player)) {
+                        GameFunctions.limitPlayerToBox(player, TMMGameConstants.PLAY_AREA);
+                    }
+                }
+            }
+
+            if (this.isRunning()) {
+                // kill players who fell off the train
+                for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+                    if (GameFunctions.isPlayerAliveAndSurvival(player) && player.getY() < TMMGameConstants.PLAY_AREA.minY) {
+                        GameFunctions.killPlayer(player, false);
+                    }
+                }
+
+                // check hitman win condition (all targets are dead)
+                GameFunctions.WinStatus winStatus = GameFunctions.WinStatus.HITMEN;
+                for (UUID player : this.getTargets()) {
+                    if (!GameFunctions.isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
+                        winStatus = GameFunctions.WinStatus.NONE;
+                    }
+                }
+
+                // check passenger win condition (all hitmen are dead)
+                if (winStatus == GameFunctions.WinStatus.NONE) {
+                    winStatus = GameFunctions.WinStatus.PASSENGERS;
+                    for (UUID player : this.getHitmen()) {
+                        if (!GameFunctions.isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
+                            winStatus = GameFunctions.WinStatus.NONE;
+                        }
+                    }
+                }
+
+                // win display
+//                if (winStatus != WinStatus.NONE && this.getFadeOut() < 0) {
+//                    for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+//                        player.sendMessage(Text.translatable("game.win." + winStatus.name().toLowerCase(Locale.ROOT)), true);
+//                    }
+//                    stopGame(serverWorld);
+//                }
+            }
+        }
+    }
+
+    private void tickCommon() {
+        if (isRunning()) {
+            gameTime++;
+        } else {
+            gameTime = 0;
+        }
+
+        // fade and start / stop game
+        if (this.getGameStatus() == GameStatus.STARTING || this.getGameStatus() == GameStatus.STOPPING) {
+            this.fade++;
+
+            if (this.getFade() >= TMMGameConstants.FADE_TIME + TMMGameConstants.FADE_PAUSE) {
+                if (world instanceof ServerWorld serverWorld) {
+                    if (this.getGameStatus() == GameStatus.STARTING)
+                        GameFunctions.initializeGame(serverWorld);
+                    if (this.getGameStatus() == GameStatus.STOPPING)
+                        GameFunctions.finalizeGame(serverWorld);
+                }
+            }
+        } else if (this.getGameStatus() == GameStatus.ACTIVE || this.getGameStatus() == GameStatus.INACTIVE) {
+            this.fade--;
+        }
     }
 
 }

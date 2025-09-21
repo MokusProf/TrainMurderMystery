@@ -1,7 +1,7 @@
 package dev.doctor4t.trainmurdermystery.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -16,7 +16,7 @@ public class StartGameCommand {
     }
 
     private static int startGame(ServerCommandSource source) {
-        TMMGameLoop.startGame(source.getWorld());
+        GameFunctions.startGame(source.getWorld());
         return 1;
     }
 }

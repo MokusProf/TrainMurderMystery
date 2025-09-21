@@ -1,6 +1,6 @@
 package dev.doctor4t.trainmurdermystery.item;
 
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.KnifeStabPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -33,7 +33,7 @@ public class KnifeItem extends Item {
     }
 
     public static HitResult getKnifeTarget(PlayerEntity user) {
-        return ProjectileUtil.getCollision(user, entity -> entity instanceof PlayerEntity player && TMMGameLoop.isPlayerAliveAndSurvival(player), 2f);
+        return ProjectileUtil.getCollision(user, entity -> entity instanceof PlayerEntity player && GameFunctions.isPlayerAliveAndSurvival(player), 2f);
     }
 
     @Override

@@ -13,7 +13,7 @@ import dev.doctor4t.trainmurdermystery.client.render.block_entity.SmallDoorBlock
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.WheelBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
 import dev.doctor4t.trainmurdermystery.game.TMMGameConstants;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.util.HandParticleManager;
 import dev.doctor4t.trainmurdermystery.util.ShootMuzzleS2CPayload;
@@ -55,7 +55,7 @@ public class TMMClient implements ClientModInitializer {
     public static Map<PlayerEntity, Vec3d> particleMap;
     private static float trainSpeed;
     private static boolean prevGameRunning;
-    public static WorldGameComponent GAME_COMPONENT;
+    public static WorldGameComponent gameComponent;
 
     public static final Map<UUID, PlayerListEntry> PLAYER_ENTRIES_CACHE = Maps.newHashMap();
 
@@ -150,7 +150,7 @@ public class TMMClient implements ClientModInitializer {
         // Caching components
         ClientTickEvents.START_WORLD_TICK.register(clientWorld -> {
             trainSpeed = TMMComponents.TRAIN.get(clientWorld).getTrainSpeed();
-            GAME_COMPONENT = TMMComponents.GAME.get(clientWorld);
+            gameComponent = TMMComponents.GAME.get(clientWorld);
             var player = MinecraftClient.getInstance().player;
             if (player != null && player.age % 80 == 0) MoodRenderer.arrowProgress = 0f;
         });
@@ -171,6 +171,7 @@ public class TMMClient implements ClientModInitializer {
         OptionLocker.overrideSoundCategoryVolume("ambient", 1.0);
         OptionLocker.overrideSoundCategoryVolume("voice", 1.0);
 
+
         // Item tooltips
         TMMItemTooltips.addTooltips();
 
@@ -181,16 +182,17 @@ public class TMMClient implements ClientModInitializer {
                     PLAYER_ENTRIES_CACHE.put(player.getUuid(), MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(player.getUuid()));
                 }
             }
+            System.out.println(gameComponent.getGameTime());
 
             // Select last slot at start of game
-            if (!prevGameRunning && GAME_COMPONENT.isRunning()) {
+            if (!prevGameRunning && gameComponent.isRunning()) {
                 MinecraftClient.getInstance().player.getInventory().selectedSlot = 8;
             }
-            prevGameRunning = GAME_COMPONENT.isRunning();
+            prevGameRunning = gameComponent.isRunning();
 
             // Fade sound with game start / stop fade
             WorldGameComponent component = TMMComponents.GAME.get(clientWorld);
-            if (component.getFade() >= 0) {
+            if (component.getFade() > 0) {
                 MinecraftClient.getInstance().getSoundManager().updateSoundVolume(SoundCategory.MASTER, MathHelper.map(component.getFade(), 0, TMMGameConstants.FADE_TIME, 1, 0));
             } else {
                 MinecraftClient.getInstance().getSoundManager().updateSoundVolume(SoundCategory.MASTER, soundLevel);
@@ -291,15 +293,15 @@ public class TMMClient implements ClientModInitializer {
     }
 
     public static boolean isPlayerAliveAndInSurvival() {
-        return TMMGameLoop.isPlayerAliveAndSurvival(MinecraftClient.getInstance().player);
+        return GameFunctions.isPlayerAliveAndSurvival(MinecraftClient.getInstance().player);
     }
 
     public static boolean isHitman() {
-        return GAME_COMPONENT.getHitmen().contains(MinecraftClient.getInstance().player.getUuid());
+        return gameComponent.getHitmen().contains(MinecraftClient.getInstance().player.getUuid());
     }
 
     public static boolean isDetective() {
-        return GAME_COMPONENT.getDetectives().contains(MinecraftClient.getInstance().player.getUuid());
+        return gameComponent.getDetectives().contains(MinecraftClient.getInstance().player.getUuid());
     }
 
     public static boolean isPassenger() {
@@ -307,11 +309,11 @@ public class TMMClient implements ClientModInitializer {
     }
 
     public static List<UUID> getTargets() {
-        return GAME_COMPONENT.getTargets();
+        return gameComponent.getTargets();
     }
 
     public static boolean shouldInstinctHighlight(Entity entityToHighlight) {
-        return isInstinctEnabled() && entityToHighlight instanceof PlayerEntity player && TMMGameLoop.isPlayerAliveAndSurvival(player);
+        return isInstinctEnabled() && entityToHighlight instanceof PlayerEntity player && GameFunctions.isPlayerAliveAndSurvival(player);
     }
     public static boolean isInstinctEnabled() {
         return TMMClient.instinctKeybind.isPressed() && TMMClient.isHitman() && TMMClient.isPlayerAliveAndInSurvival();

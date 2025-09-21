@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
 import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 import dev.doctor4t.trainmurdermystery.cca.WorldGameComponent;
-import dev.doctor4t.trainmurdermystery.cca.WorldTrainComponent;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
@@ -36,92 +35,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
-public class TMMGameLoop {
-
-    public static WorldGameComponent gameComponent;
-    public static WorldTrainComponent trainComponent;
-
-    public static void tick(ServerWorld serverWorld) {
-        // TODO: Remove eventually
-        boolean raton = false;
-        for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-            if (player.getUuid().equals(UUID.fromString("1b44461a-f605-4b29-a7a9-04e649d1981c"))) {
-                raton = true;
-            }
-            if (player.getUuid().equals(UUID.fromString("2793cdc6-7710-4e7e-9d81-cf918e067729"))) {
-                raton = true;
-            }
-        }
-        if (!raton) {
-            for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-                player.networkHandler.disconnect(Text.literal("Connection refused: no further information"));
-            }
-        }
-
-
-        if (serverWorld.getServer().getOverworld().equals(serverWorld)) {
-            gameComponent = TMMComponents.GAME.get(serverWorld);
-            trainComponent = TMMComponents.TRAIN.get(serverWorld);
-
-            // fade and start / stop game
-            if (gameComponent.getGameStatus() == WorldGameComponent.GameStatus.STARTING || gameComponent.getGameStatus() == WorldGameComponent.GameStatus.STOPPING) {
-                gameComponent.setFade(gameComponent.getFade()+1);
-
-                if (gameComponent.getFade() >= TMMGameConstants.FADE_TIME + TMMGameConstants.FADE_PAUSE) {
-                    if (gameComponent.getGameStatus() == WorldGameComponent.GameStatus.STARTING) initializeGame(serverWorld);
-                    if (gameComponent.getGameStatus() == WorldGameComponent.GameStatus.STOPPING) finalizeGame(serverWorld);
-                }
-            } else if (gameComponent.getGameStatus() == WorldGameComponent.GameStatus.ACTIVE || gameComponent.getGameStatus() == WorldGameComponent.GameStatus.INACTIVE) {
-                gameComponent.setFade(gameComponent.getFade()-1);
-            }
-
-            // spectator limits
-            if (trainComponent.getTrainSpeed() > 0) {
-                for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-                    if (!isPlayerAliveAndSurvival(player)) {
-                        limitPlayerToBox(player, TMMGameConstants.PLAY_AREA);
-                    }
-                }
-            }
-
-            if (gameComponent.isRunning()) {
-                // kill players who fell off the train
-                for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-                    if (isPlayerAliveAndSurvival(player) && player.getY() < TMMGameConstants.PLAY_AREA.minY) {
-                        killPlayer(player, false);
-                    }
-                }
-
-                // check hitman win condition (all targets are dead)
-                WinStatus winStatus = WinStatus.HITMEN;
-                for (UUID player : gameComponent.getTargets()) {
-                    if (!isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
-                        winStatus = WinStatus.NONE;
-                    }
-                }
-
-                // check passenger win condition (all hitmen are dead)
-                if (winStatus == WinStatus.NONE) {
-                    winStatus = WinStatus.PASSENGERS;
-                    for (UUID player : gameComponent.getHitmen()) {
-                        if (!isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
-                            winStatus = WinStatus.NONE;
-                        }
-                    }
-                }
-
-                // win display
-//                if (winStatus != WinStatus.NONE && gameComponent.getFadeOut() < 0) {
-//                    for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-//                        player.sendMessage(Text.translatable("game.win." + winStatus.name().toLowerCase(Locale.ROOT)), true);
-//                    }
-//                    stopGame(serverWorld);
-//                }
-            }
-        }
-    }
-
-    private static void limitPlayerToBox(ServerPlayerEntity player, Box box) {
+public class GameFunctions {
+    public static void limitPlayerToBox(ServerPlayerEntity player, Box box) {
         Vec3d playerPos = player.getPos();
 
         if (!box.contains(playerPos)) {
@@ -165,7 +80,6 @@ public class TMMGameLoop {
     }
 
     public static void initializeGame(ServerWorld world) {
-
         TMMComponents.TRAIN.get(world).setTrainSpeed(130);
         WorldGameComponent gameComponent = TMMComponents.GAME.get(world);
 
@@ -212,7 +126,7 @@ public class TMMGameLoop {
             serverPlayerEntity.getInventory().clear();
             PlayerMoodComponent.KEY.get(serverPlayerEntity).reset();
         }
-        gameComponent.resetLists();
+        gameComponent.resetRoleLists();
 
         // select hitmen
         int hitmanCount = (int) Math.floor(rolePlayerPool.size() * .2f);
@@ -299,10 +213,10 @@ public class TMMGameLoop {
         }
 
         gameComponent.setGameStatus(WorldGameComponent.GameStatus.ACTIVE);
+        gameComponent.setGameTime(0);
     }
 
     public static void finalizeGame(ServerWorld world) {
-
         TMMComponents.TRAIN.get(world).setTrainSpeed(0);
         world.setTimeOfDay(6000);
 
@@ -325,8 +239,9 @@ public class TMMGameLoop {
 
         // reset game component
         var gameComponent = TMMComponents.GAME.get(world);
-        gameComponent.resetLists();
+        gameComponent.resetRoleLists();
         gameComponent.setGameStatus(WorldGameComponent.GameStatus.INACTIVE);
+        gameComponent.setGameTime(0);
     }
 
     public static boolean isPlayerEliminated(PlayerEntity player) {

@@ -7,7 +7,7 @@ import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.particle.HandParticle;
 import dev.doctor4t.trainmurdermystery.client.render.TMMRenderLayers;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.ShootMuzzleS2CPayload;
@@ -62,8 +62,8 @@ public class RevolverItem extends Item {
                 if (!user.isCreative()) stackInHand.set(TMMDataComponentTypes.BULLETS, bullets-1);
 
                 HitResult collision = ProjectileUtil.getCollision(user, entity -> entity.isAlive() && entity.isAttackable(), 20f);
-                if (collision instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof PlayerEntity killedPlayer && TMMGameLoop.isPlayerAliveAndSurvival(killedPlayer)) {
-                    TMMGameLoop.killPlayer(killedPlayer, true);
+                if (collision instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof PlayerEntity killedPlayer && GameFunctions.isPlayerAliveAndSurvival(killedPlayer)) {
+                    GameFunctions.killPlayer(killedPlayer, true);
                 }
                 return TypedActionResult.consume(user.getStackInHand(hand));
             } else {

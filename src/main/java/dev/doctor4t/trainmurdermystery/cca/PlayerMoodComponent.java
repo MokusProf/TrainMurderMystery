@@ -2,7 +2,7 @@ package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.game.TMMGameConstants;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.util.Carriage;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -58,7 +58,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
             this.nextPreferenceTimer = (int) (this.player.getRandom().nextFloat() * (TMMGameConstants.MAX_PREFERENCE_COOLDOWN - TMMGameConstants.MIN_PREFERENCE_COOLDOWN) + TMMGameConstants.MIN_PREFERENCE_COOLDOWN);
             shouldSync = true;
         }
-        if (this.currentPreference.isFulfilled(this.player) || !TMMGameLoop.isPlayerAliveAndSurvival(this.player)) {
+        if (this.currentPreference.isFulfilled(this.player) || !GameFunctions.isPlayerAliveAndSurvival(this.player)) {
             if (!this.fulfilled) shouldSync = true;
             this.fulfilled = true;
         } else {

@@ -1,7 +1,7 @@
 package dev.doctor4t.trainmurdermystery.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ public class StopGameCommand {
     }
 
     private static int stopGame(@NotNull ServerCommandSource source) {
-        TMMGameLoop.stopGame(source.getWorld());
+        GameFunctions.stopGame(source.getWorld());
         return 1;
     }
 }

@@ -2,7 +2,7 @@ package dev.doctor4t.trainmurdermystery.util;
 
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.game.TMMGameConstants;
-import dev.doctor4t.trainmurdermystery.game.TMMGameLoop;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -11,7 +11,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +29,7 @@ public record KnifeStabPayload(int target) implements CustomPayload {
             var player = context.player();
 			if (!(player.getServerWorld().getEntityById(payload.target()) instanceof PlayerEntity target)) return;
 			if (target.distanceTo(player) > 3.0) return;
-			TMMGameLoop.killPlayer(target, true);
+			GameFunctions.killPlayer(target, true);
 			target.playSound(TMMSounds.ITEM_KNIFE_STAB, 1.0f, 1.0f);
 			player.swingHand(Hand.MAIN_HAND);
 			if (!player.isCreative()) player.getItemCooldownManager().set(TMMItems.KNIFE, TMMGameConstants.KNIFE_COOLDOWN);
