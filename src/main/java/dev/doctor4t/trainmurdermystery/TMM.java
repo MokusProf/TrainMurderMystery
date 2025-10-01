@@ -160,3 +160,9 @@ public class TMM implements ModInitializer {
 // TODO: small video tutorial on how to play
 // TODO: Ability to customize time of day for supporters + snow density
 // TODO: Initial discovery mode
+// TODO: Both skeleton and body have the outline, only have it on skeleton
+// TODO: Have body disappear at 2 blocks
+// TODO: Spectators can see time left
+// TODO: Remove relative teleport
+// TODO: Fix train horn
+// TODO: Fix hands

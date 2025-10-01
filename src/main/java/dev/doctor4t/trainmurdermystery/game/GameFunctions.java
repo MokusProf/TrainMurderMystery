@@ -230,16 +230,9 @@ public class GameFunctions {
             PlayerPsychoComponent.KEY.get(player).reset();
             PlayerNoteComponent.KEY.get(player).reset();
 
-            // teleport adventure players relative to spawn
-            if (GameFunctions.isPlayerAliveAndSurvival(player)) {
-                Vec3d pos = player.getPos().subtract(GameConstants.PLAY_OFFSET);
-                player.requestTeleport(pos.getX(), pos.getY(), pos.getZ());
-            } else {
-                // reset spectators to adventure mode,
-                var teleportTarget = new TeleportTarget(world, GameConstants.SPAWN_POS, Vec3d.ZERO, 90, 0, TeleportTarget.NO_OP);
-                player.changeGameMode(GameMode.ADVENTURE);
-                player.teleportTo(teleportTarget);
-            }
+            player.changeGameMode(GameMode.ADVENTURE);
+            var teleportTarget = new TeleportTarget(world, GameConstants.SPAWN_POS, Vec3d.ZERO, 90, 0, TeleportTarget.NO_OP);
+            player.teleportTo(teleportTarget);
         }
 
 
