@@ -148,10 +148,11 @@ public class SmallDoorBlock extends DoorPartBlock {
             } else {
                 boolean requiresKey = !entity.getKeyName().isEmpty();
                 boolean hasLockpick = player.getMainHandStack().isOf(TMMItems.LOCKPICK);
+                boolean jammed = entity.isJammed();
 
                 if (entity.isOpen()) {
                     return open(state, world, entity, lowerPos);
-                } else if (requiresKey) {
+                } else if (requiresKey && !jammed) {
                     if (player.getMainHandStack().isOf(TMMItems.CROWBAR)) return ActionResult.FAIL;
                     if (player.getMainHandStack().isOf(TMMItems.KEY) || hasLockpick) {
                         LoreComponent lore = player.getMainHandStack().get(DataComponentTypes.LORE);
@@ -177,7 +178,7 @@ public class SmallDoorBlock extends DoorPartBlock {
                     }
                     return ActionResult.FAIL;
                 } else {
-                    if (entity.isJammed()) {
+                    if (jammed) {
                         if (!world.isClient) {
                             world.playSound(null, lowerPos.getX() + .5f, lowerPos.getY() + 1, lowerPos.getZ() + .5f, TMMSounds.BLOCK_DOOR_LOCKED, SoundCategory.BLOCKS, 1f, 1f);
                             player.sendMessage(Text.translatable("tip.door.jammed"), true);
