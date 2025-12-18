@@ -13,7 +13,7 @@ import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
 public class MapVariablesWorldComponent implements AutoSyncedComponent {
-    public static final ComponentKey<MapVariablesWorldComponent> KEY = ComponentRegistry.getOrCreate(Wathe.id("mapVariables"), MapVariablesWorldComponent.class);
+    public static final ComponentKey<MapVariablesWorldComponent> KEY = ComponentRegistry.getOrCreate(Wathe.id("mapvariables"), MapVariablesWorldComponent.class);
     private final World world;
 
     public MapVariablesWorldComponent(World world) {

@@ -1,5 +1,6 @@
 package dev.doctor4t.wathe.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -158,5 +159,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void wathe$readData(NbtCompound nbt, CallbackInfo ci) {
         this.sprintingTicks = nbt.getFloat("sprintingTicks");
+    }
+
+    @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isDay()Z"))
+    private boolean wathe$cancelWakingUpPlayers(boolean original) {
+        return false;
     }
 }

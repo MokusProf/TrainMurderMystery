@@ -14,7 +14,7 @@
 		"Arathain"
 	],
 	"license": "ARR",
-	"icon": "icon2.png",
+	"icon": "assets/wathe/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -39,20 +39,20 @@
 	"accessWidener" : "wathe.accesswidener",
 	"custom": {
 		"cardinal-components": [
-			"wathe:mapVariables",
 			"wathe:train",
 			"wathe:game",
+			"wathe:mapvariables",
+			"wathe:blackout",
+			"wathe:time",
+			"wathe:autostart",
+			"wathe:roundend",
 			"wathe:role",
 			"wathe:mood",
 			"wathe:shop",
 			"wathe:poison",
 			"wathe:psycho",
-			"wathe:blackout",
 			"wathe:rolecounter",
-			"wathe:note",
-			"wathe:time",
-			"wathe:autostart",
-			"wathe:roundend"
+			"wathe:note"
 		],
 		"loom:injected_interfaces": {
 			"net/minecraft/class_5483/class_5496" : ["dev/doctor4t/wathe/util/BlockSettingsAdditions"]
