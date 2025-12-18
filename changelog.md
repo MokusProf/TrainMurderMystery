@@ -14,6 +14,7 @@ Wathe 1.3 - 1.21.1
     during the day
   - Added a generic simple map effect that can be used by custom non-train maps
 - Added a /wathe:mapVariables command that allows changing variables for custom maps:
+  - gameModeAndMapEffect: The default game mode and map effect the map will use (with auto-start or when using the train horn).
   - spawnPos: The spawn position and orientation players will be reset to once the game ends.
   - spectatorSpawnPos: The spawn position and orientation players will be set to when set as spectators at the start of a game.
   - readyArea: The lobby area which players need to be in to be selected for a game.
@@ -28,6 +29,7 @@ Wathe 1.3 - 1.21.1
 - Fixed double doors not jamming together
 - Fixed Derringers not replenishing on kill
 - Fixed Revolvers being able to be double fired
+- Fixed the ready area being slightly too small
 - Tweaked the API to allow more modability (PunIsIntendeds)
 - Updated French translation (PadjokeJ)
 - Updated German translation (Lukas0094)

@@ -133,6 +133,7 @@ public class WatheLangGen extends FabricLanguageProvider {
         builder.add("wathe.gui.reset", "Clear");
 
         builder.add("wathe.map_variables.help", """
+                    gameModeAndMapEffect: The default game mode and map effect the map will use (with auto-start or when using the train horn).
                     spawnPos: The spawn position and orientation players will be reset to once the game ends.
                     spectatorSpawnPos: The spawn position and orientation players will be set to when set as spectators at the start of a game.
                     readyArea: The lobby area which players need to be in to be selected for a game.

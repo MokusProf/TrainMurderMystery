@@ -41,11 +41,11 @@ public class AutoStartComponent implements AutoSyncedComponent, CommonTickingCom
 
         if (this.startTime <= 0 && this.time <= 0) return;
 
-        if (GameFunctions.getReadyPlayerCount(world) >= gameWorldComponent.getGameMode().minPlayerCount) {
+        GameMode gameMode = gameWorldComponent.getGameMode();
+        if (GameFunctions.getReadyPlayerCount(world) >= gameMode.minPlayerCount) {
             if (this.time-- <= 0 && this.world instanceof ServerWorld serverWorld) {
                 if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.INACTIVE) {
-                    GameMode gameMode = WatheGameModes.MURDER;
-                    GameFunctions.startGame(serverWorld, gameMode, WatheMapEffects.HARPY_EXPRESS_NIGHT, GameConstants.getInTicks(gameMode.defaultStartTime, 0));
+                    GameFunctions.startGame(serverWorld, gameMode, gameWorldComponent.getMapEffect(), GameConstants.getInTicks(gameMode.defaultStartTime, 0));
                     return;
                 }
             }

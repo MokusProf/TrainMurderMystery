@@ -68,9 +68,10 @@ public class HornBlock extends BlockWithEntity {
                     world.playSound(null, mid.getX(), mid.getY() + 3, mid.getZ(), WatheSounds.AMBIENT_TRAIN_HORN, SoundCategory.AMBIENT, 100.0f, 1.0f);
 
                 // start game
-                if (isOp && !GameWorldComponent.KEY.get(serverWorld).isRunning()) {
-                    GameMode gameMode = WatheGameModes.MURDER;
-                    GameFunctions.startGame(serverWorld, gameMode, WatheMapEffects.HARPY_EXPRESS_NIGHT, GameConstants.getInTicks(gameMode.defaultStartTime, 0));
+                GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(serverWorld);
+                if (isOp && !gameWorldComponent.isRunning()) {
+                    GameMode gameMode = gameWorldComponent.getGameMode();
+                    GameFunctions.startGame(serverWorld, gameMode, gameWorldComponent.getMapEffect(), GameConstants.getInTicks(gameMode.defaultStartTime, 0));
                 }
 
                 hornBlockEntity.pull(1);

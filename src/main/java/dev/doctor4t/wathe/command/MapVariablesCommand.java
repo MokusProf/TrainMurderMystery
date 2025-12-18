@@ -1,10 +1,16 @@
 package dev.doctor4t.wathe.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import dev.doctor4t.wathe.Wathe;
+import dev.doctor4t.wathe.api.GameMode;
+import dev.doctor4t.wathe.api.MapEffect;
+import dev.doctor4t.wathe.api.WatheGameModes;
+import dev.doctor4t.wathe.api.WatheMapEffects;
+import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.cca.MapVariablesWorldComponent;
+import dev.doctor4t.wathe.command.argument.GameModeArgumentType;
+import dev.doctor4t.wathe.command.argument.MapEffectArgumentType;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.command.argument.Vec3ArgumentType;
@@ -32,6 +38,18 @@ public class MapVariablesCommand {
                                 )
                         )
                         .then(CommandManager.literal("set")
+                                .then(CommandManager.literal("gameModeAndMapEffect")
+                                        .then(CommandManager.argument("gameMode", GameModeArgumentType.gameMode())
+                                                .then(CommandManager.argument("mapEffect", MapEffectArgumentType.mapEffect())
+                                                        .executes(context -> setDefaultGameModeAndMapEffect(
+                                                                        context.getSource(),
+                                                                        GameModeArgumentType.getGameModeArgument(context, "gameMode"),
+                                                                        MapEffectArgumentType.getMapEffectArgument(context, "mapEffect")
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
                                 .then(CommandManager.literal("spawnPosition")
                                         .then(CommandManager.argument("location", Vec3ArgumentType.vec3())
                                                 .then(CommandManager.argument("rotation", RotationArgumentType.rotation())
@@ -135,6 +153,25 @@ public class MapVariablesCommand {
     private static int sendHelp(ServerCommandSource source) {
         source.sendMessage(Text.translatable("wathe.map_variables.help"));
         return 1;
+    }
+
+    private static int setDefaultGameModeAndMapEffect(ServerCommandSource source, GameMode gameMode, MapEffect mapEffect) {
+        GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(source.getWorld());
+        if (gameWorldComponent.isRunning()) {
+            source.sendError(Text.translatable("game.start_error.game_running"));
+            return -1;
+        }
+        if (gameMode == WatheGameModes.LOOSE_ENDS || gameMode == WatheGameModes.DISCOVERY || mapEffect == WatheMapEffects.HARPY_EXPRESS_SUNDOWN || mapEffect == WatheMapEffects.HARPY_EXPRESS_DAY) {
+            return Wathe.executeSupporterCommand(source, () -> setGameModeAndMapEffect(gameMode, mapEffect, gameWorldComponent));
+        } else {
+            setGameModeAndMapEffect(gameMode, mapEffect, gameWorldComponent);
+            return 1;
+        }
+    }
+
+    private static void setGameModeAndMapEffect(GameMode gameMode, MapEffect mapEffect, GameWorldComponent gameWorldComponent) {
+        gameWorldComponent.setGameMode(gameMode);
+        gameWorldComponent.setMapEffect(mapEffect);
     }
 
     private static <T> int setValue(ServerCommandSource source, String valueName, T value, Consumer<T> consumer) {
