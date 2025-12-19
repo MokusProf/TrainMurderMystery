@@ -25,7 +25,6 @@ public class ShaderLoaderMixin {
                             "    _vert_position += Offsets[_draw_id].pos.xyz;")
                     .build();
 
-//            System.out.println(modifiedShader);
             cir.setReturnValue(modifiedShader);
         }
     }

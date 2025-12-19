@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:item/handheld",
+  "parent": "wathe:item/template_knife",
   "textures": {
     "layer0": "wathe:item/knife_ceremonial"
   }

@@ -19,7 +19,6 @@ public interface WatheCosmetics {
     static String getSkin(ItemStack itemStack) {
         UUID owner = UUID.fromString(itemStack.getOrDefault(WatheDataComponentTypes.OWNER, "98eaa37f-7712-4809-b709-504d3be0b6ef")); // random uuid
         String itemName = itemStack.getItem().getName().getString().toLowerCase(Locale.ROOT);
-
         Optional<WeaponSkinsSupporterData> optional = WEAPON_SKINS_DATA.get(owner);
         if (optional.isPresent()) {
             String serialized = optional.get().serialized();

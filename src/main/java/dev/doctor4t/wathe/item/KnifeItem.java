@@ -1,20 +1,23 @@
 package dev.doctor4t.wathe.item;
 
+import dev.doctor4t.ratatouille.util.TextUtils;
 import dev.doctor4t.wathe.Wathe;
 import dev.doctor4t.wathe.game.GameFunctions;
 import dev.doctor4t.wathe.index.WatheCosmetics;
-import dev.doctor4t.wathe.index.WatheDataComponentTypes;
 import dev.doctor4t.wathe.index.WatheSounds;
 import dev.doctor4t.wathe.util.KnifeStabPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -22,10 +25,11 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class KnifeItem extends Item {
+public class KnifeItem extends Item implements ItemWithSkin {
 
     /**
      * the registry ID of the knife item
@@ -38,16 +42,34 @@ public class KnifeItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, @NotNull PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
-
-        Skin currentSkin = Skin.fromString(WatheCosmetics.getSkin(itemStack));
-        WatheCosmetics.setSkin(user.getUuid(), itemStack, Skin.getNext(currentSkin).getName());
-
         user.setCurrentHand(hand);
         user.playSound(WatheSounds.ITEM_KNIFE_PREPARE, 1.0f, 1.0f);
         return TypedActionResult.consume(itemStack);
     }
+
+    @Override
+    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+        if (clickType == ClickType.RIGHT && otherStack.isEmpty())  {
+            Skin currentSkin = Skin.fromString(WatheCosmetics.getSkin(stack));
+            WatheCosmetics.setSkin(player.getUuid(), stack, Skin.getNext(currentSkin).getName());
+            player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.8F, 1.5f);
+
+            return true;
+        } else return false;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+        Skin skin = Skin.fromString(WatheCosmetics.getSkin(stack));
+
+        if (skin != null && skin != Skin.DEFAULT) {
+            tooltip.add(Text.literal(skin.tooltipName != null ? skin.tooltipName : TextUtils.formatValueString(skin.getName())).styled(style -> style.withColor(skin.getColor())));
+        }
+
+        super.appendTooltip(stack, context, tooltip, type);
+    }
+
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
@@ -79,18 +101,16 @@ public class KnifeItem extends Item {
     }
 
     public enum Skin {
-        DEFAULT(new int[]{0xFF2B2632}, new int[]{0xFF1B1B1B}, "default"),
-        CEREMONIAL(new int[]{0xFFE7761F}, new int[]{0xFFA84701}, "Ceremonial Dagger"),
-        PICK(new int[]{0xFFE7761F}, new int[]{0xFFA84701}, "Ice Pick");
+        DEFAULT(0xFF2B2632, "default"),
+        CEREMONIAL(0xFFD98C28, "Ceremonial Dagger"),
+        PICK(0xFF8D4A51, "Ice Pick");
 
-        public final int[] colors;
-        public final int[] shadowColors;
+        public final int color;
         public final @Nullable String tooltipName;
         public final Random random;
 
-        Skin(int[] colors, int[] shadowColors, @Nullable String tooltipName) {
-            this.colors = colors;
-            this.shadowColors = shadowColors;
+        Skin(int color, @Nullable String tooltipName) {
+            this.color = color;
             this.tooltipName = tooltipName;
             this.random = new Random();
         }
@@ -99,13 +119,8 @@ public class KnifeItem extends Item {
             return this.name().toLowerCase(Locale.ROOT);
         }
 
-        public int getFirstColor() {
-            return this.colors[0];
-        }
-
-        public Pair<Integer, Integer> getRandomParticleColorPair() {
-            int i = this.random.nextInt(this.colors.length);
-            return new Pair<>(this.colors[i], this.shadowColors[i]);
+        public int getColor() {
+            return this.color;
         }
 
         public static Skin fromString(String name) {
